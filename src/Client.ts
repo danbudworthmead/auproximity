@@ -18,6 +18,8 @@ export interface Pose {
 }
 
 export default class Client implements IClientBase {
+    public redisClient: any;
+
     public socket: Socket
     public room?: Room;
 
@@ -27,7 +29,8 @@ export default class Client implements IClientBase {
     public group: RoomGroup;
     public pose: Pose;
 
-    constructor(socket: Socket, uuid: string) {
+    constructor(socket: Socket, uuid: string, redisClient: any) {
+        this.redisClient = redisClient;
         this.socket = socket;
         this.uuid = uuid;
         this.pose = {
@@ -43,6 +46,9 @@ export default class Client implements IClientBase {
         });
         this.socket.on(ClientSocketEvents.JoinRoom, async (payload: { name: string; backendModel: BackendModel }) => {
             await this.joinRoom(payload.name, payload.backendModel);
+        });
+        this.socket.on(ClientSocketEvents.JoinSkeldNet, async (payload: { skeldId: string }) => {
+            await this.joinSkeldNetRoom(payload.skeldId);
         });
         this.socket.emit(ClientSocketEvents.SetUuid, this.uuid);
     }
@@ -74,6 +80,38 @@ export default class Client implements IClientBase {
         }
         room.addClient(this);
         this.room = room;
+    }    
+    async joinSkeldNetRoom(skeldId: string): Promise<void> {
+        if (this.room) {
+            await this.leaveRoom();
+        }
+        this.redisClient.hgetall('skeld_id.' + skeldId, (err, value) => {
+
+            this.name = value.name;
+
+            var backendModel: ImpostorBackendModel;
+            backendModel.gameCode = value.game_code;
+            
+            this.redisClient.hgetall('ImpostorRedis' + backendModel.gameCode, (err, value) => {
+                backendModel.ip = value.data.split[':'][0];
+
+                // TODO: make this just a deepEqual on backendModel
+                let room = state.allRooms.find(room => {
+                    if (room.backendModel.gameCode !== backendModel.gameCode) return false;
+                    if (room.backendModel.backendType === BackendType.Impostor) {
+                        return (room.backendModel as ImpostorBackendModel).ip === (backendModel as ImpostorBackendModel).ip;
+                    }
+                    return false;
+                });
+
+                if (!room) {
+                    room = new Room(backendModel);
+                    state.allRooms.push(room);
+                }
+                room.addClient(this);
+                this.room = room;
+            });
+        });
     }
     async leaveRoom(): Promise<void> {
         this.name = "";

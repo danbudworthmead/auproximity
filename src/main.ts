@@ -8,6 +8,17 @@ import {ExpressPeerServer} from "peer";
 import path from "path";
 import sslRedirect from "heroku-ssl-redirect";
 
+const config = require("./RedisConfig.json");
+const redis = require("redis");
+const redisClient = redis.createClient({
+    host: config.host,
+    port: config.port,
+    password: config.pass,
+});
+redisClient.on("error", function(error) {
+    console.error("REDIS ERROR: " + error);
+});
+
 const app = express();
 app.use(sslRedirect());
 app.use(express.static(path.join(__dirname, "dist")));
@@ -37,7 +48,7 @@ export const state: {
     allRooms: []
 };
 io.on("connection", (socket: Socket) => {
-    const client = new Client(socket, v4());
+    const client = new Client(socket, v4(), redisClient);
     state.allClients.push(client);
     console.log("user connected", client.uuid);
 });

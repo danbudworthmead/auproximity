@@ -9,6 +9,7 @@ enum ClientSocketEvents {
     SetMap        = "setmap",
     SetPose       = "setpose",
     SetGroup      = "setgroup",
+    JoinSkeldNet  = "joinskeldnet",
 }
 
 export default ClientSocketEvents;
