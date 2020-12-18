@@ -6,12 +6,12 @@
           alt="Logo"
           class="shrink mr-2"
           contain
-          src="@/assets/au1.png"
+          src="@/assets/skeld.png"
           transition="scale-transition"
           width="80"
         />
 
-        <h2 class="px-3 hidden-xs-only">Among Us Proximity Voice</h2>
+        <h2 class="px-3 hidden-xs-only">skeld.net proximity voice</h2>
       </div>
 
       <v-spacer></v-spacer>
