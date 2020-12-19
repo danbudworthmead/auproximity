@@ -36,7 +36,7 @@ export default class Home extends Vue {
     }
     this.$store.commit('setJoinedRoom', true)
     this.$store.commit('setNameAndBackendModel', payload)
-    this.$socket.client.emit(ClientSocketEvents.JoinSkeldNetRoom, payload)
+    this.$socket.client.emit(ClientSocketEvents.JoinRoom, payload)
   }
 }
 </script>
