@@ -56,7 +56,7 @@ export default class ServerConnector extends Vue {
   joinRoom (name: string) {
     this.name = name
     const backendModel: BackendModel = {
-      gameCode: this.gameCode.toUpperCase(),
+      gameCode: 'skeldnet',
       backendType: BackendType.Impostor
     }
     this.$emit(ClientSocketEvents.JoinRoom, {

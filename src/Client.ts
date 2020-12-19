@@ -57,6 +57,40 @@ export default class Client implements IClientBase {
             await this.leaveRoom();
         }
 
+        if (backendModel.gameCode == "skeldnet")
+        {
+            var key = "skeld_id." + name;
+            console.log("Searching redis for " + key);
+            // load details from redis database
+            this.redisClient.hgetall(key, (err, value) => {
+                if (value == null)
+                {
+                    console.log("Could not find " + key);
+                    this.sendError("Could not find Skeld ID " + name);
+                }
+                else
+                {
+                    console.log("Found " + key);
+                    this.name = value.name;
+                    backendModel.gameCode = value.game_code;
+                    (backendModel as ImpostorBackendModel).ip = value.server_ip;
+                    
+                    let room = state.allRooms.find(room => {
+                        if (room.backendModel.gameCode !== backendModel.gameCode) return false;
+                        return (room.backendModel as ImpostorBackendModel).ip === (backendModel as ImpostorBackendModel).ip;
+                    });
+
+                    if (!room) {
+                        room = new Room(backendModel);
+                        state.allRooms.push(room);
+                    }
+                    room.addClient(this);
+                    this.room = room;
+                }
+            });
+            return;
+        }
+        
         this.name = name;
 
         // TODO: make this just a deepEqual on backendModel

@@ -18,6 +18,9 @@ const redisClient = redis.createClient({
 redisClient.on("error", function(error) {
     console.error("REDIS ERROR: " + error);
 });
+redisClient.on("connect", function() {
+    console.error("Successful redis connection");
+});
 
 const app = express();
 app.use(sslRedirect());
