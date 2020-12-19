@@ -14,6 +14,7 @@ const redisClient = redis.createClient({
     host: config.host,
     port: config.port,
     password: config.pass,
+    db: 2,
 });
 redisClient.on("error", function(error) {
     console.error("REDIS ERROR: " + error);
